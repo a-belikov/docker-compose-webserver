@@ -1,0 +1,37 @@
+version: '2.0'
+
+services:
+    db-2:
+        build: db
+        ports:
+            - 3306:3306
+        volumes:
+            - "./.data/db:/var/lib/mysql"
+            - "./logs/:/var/log/"
+        environment:
+            MYSQL_ROOT_PASSWORD: root
+            MYSQL_DATABASE: dbase 
+    php:
+        build: php5.6-fpm
+        ports:
+            - 9000:9000
+        expose:
+            - "9000"
+            - "9001"
+        links:
+            - db-2:mysqldb
+        volumes:
+            - ./www:/var/www/vhosts/site
+            - ./logs/:/var/log
+    nginx-2:
+        build: nginx
+        ports:
+            - 80:80
+            - 443:443
+        links:
+            - php
+        volumes_from:
+            - php
+        volumes:
+            - ./logs/nginx/:/var/log/nginx
+
